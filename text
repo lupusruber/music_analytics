@@ -1,0 +1,11 @@
+docker compose up -d
+
+docker run -it \
+  --network host \
+  events:1.0 \
+    -c "examples/example-config.json" \
+    --start-time "2021-03-18T17:00:00" \
+    --end-time "2022-03-18T17:00:00" \
+    --nusers 20000 \
+    --kafkaBrokerList localhost:9092 \
+    --continuous
