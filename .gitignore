@@ -4,3 +4,5 @@ data
 /airflow/plugins
 checkpoints
 /airflow
+/postgres/dwh_postgres_data
+/scripts/__pycache__
