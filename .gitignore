@@ -6,3 +6,4 @@ checkpoints
 /airflow
 /postgres/dwh_postgres_data
 /scripts/__pycache__
+*.csv
