@@ -8,7 +8,7 @@ def song_dim_stream(spark, listen_events_stream):
 
     def process_batch_for_song_dim(batch_df: DataFrame, batch_id: int) -> None:
 
-        # check which ones are already in the DWH and then append the new ones to the DWH
+        # Check which ones are already in the DWH and then append the new ones to the DWH
         # 1. Read the Song Dim from DWH
         # 2. Antijoin DWH_Song_SKs with batch_Song_SKs
         # 3. Append the new rows to DWH

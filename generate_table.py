@@ -5,7 +5,7 @@ from pyspark.sql.types import (
     StringType,
     DoubleType,
     LongType,
-    IntegerType
+    IntegerType,
 )
 
 
@@ -17,17 +17,21 @@ os.environ["PYSPARK_SUBMIT_ARGS"] = (
     "org.postgresql:postgresql:42.5.0 pyspark-shell"
 )
 
+
 session_fact_schema = StructType(
     [
         StructField("userId", LongType(), False),
         StructField("DateSK", StringType(), False),
         StructField("DateTimeSK", StringType(), False),
         StructField("session_start_ts", LongType(), False),
-        StructField("session_end_ts", LongType(), False),
-        StructField("level", StringType(), False),
+        StructField("session_end_ts", LongType(), True),
+        StructField("level", StringType(), True),
         StructField("session_duration", DoubleType(), True),
-        StructField("primary_s_location", StringType(), False),
+        StructField("primary_s_location", StringType(), True),
         StructField("SessionSK", StringType(), False),
+        StructField("record_valid_from", LongType(), True),
+        StructField("record_valid_to", LongType(), True),
+        StructField("is_record_valid", IntegerType(), True),
     ]
 )
 

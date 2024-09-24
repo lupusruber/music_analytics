@@ -83,8 +83,6 @@ def date_and_date_time_stream(spark, page_view_events):
         )
     )
 
-    only_ts.printSchema()
-
     date_date_time_writer = (
         only_ts.writeStream.foreachBatch(process_batch_for_date_date_time_dim)
         .option(

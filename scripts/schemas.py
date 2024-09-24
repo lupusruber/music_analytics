@@ -171,6 +171,9 @@ event_fact_schema = StructType(
         StructField("is_last_listen_event", IntegerType(), True),
         StructField("is_song_skipped", IntegerType(), True),
         StructField("next_listen_event_time_gap", IntegerType(), True),
+        StructField("record_valid_from", LongType(), True),
+        StructField("record_valid_to", LongType(), True),
+        StructField("is_record_valid", IntegerType(), True),
     ]
 )
 
@@ -178,22 +181,22 @@ event_dim_schema = StructType(
     [
         StructField("EventSK", StringType(), False),
         StructField("userId", LongType(), False),
-        StructField("itemInSession", LongType(), True),
-        StructField("sessionId", StringType(), True),
+        StructField("itemInSession", LongType(), False),
+        StructField("sessionId", StringType(), False),
         StructField("userAgent", StringType(), True),
         StructField("page", StringType(), True),
         StructField("auth", StringType(), True),
         StructField("method", StringType(), True),
         StructField("status", StringType(), True),
         StructField("level", StringType(), True),
-        StructField("type", IntegerType(), True),
+        StructField("is_listen_event", IntegerType(), True),
     ]
 )
 
 session_dim_schema = StructType(
     [
         StructField("SessionSK", StringType(), False),
-        StructField("sessionId", StringType(), False),
+        StructField("sessionId", LongType(), False),
         StructField("userId", LongType(), False),
     ]
 )
@@ -216,5 +219,8 @@ session_fact_schema = StructType(
         StructField("session_duration", DoubleType(), True),
         StructField("primary_s_location", StringType(), True),
         StructField("SessionSK", StringType(), False),
+        StructField("record_valid_from", LongType(), True),
+        StructField("record_valid_to", LongType(), True),
+        StructField("is_record_valid", IntegerType(), True),
     ]
 )

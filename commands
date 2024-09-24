@@ -11,7 +11,7 @@ docker run -d \
 
 
   docker run -d \
-  --network docker-eventsim_kafka-net \
+  --network kafka_kafka-net \
   events:1.0 \
     -c "examples/example-config.json" \
     --start-time "2021-01-01T00:00:00" \
