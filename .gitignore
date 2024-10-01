@@ -7,3 +7,9 @@ checkpoints
 /postgres/dwh_postgres_data
 /scripts/__pycache__
 *.csv
+/terraform/kafka-gke-cluster/.terraform
+*.hcl
+*.tfstate
+*.backup
+.terraform
+keys

@@ -19,3 +19,21 @@ docker run -d \
     --nusers 100 \
     --kafkaBrokerList kafka:9092
 
+
+docker run -d \
+  --network host \
+  events:1.0 \
+    -c "examples/example-config.json" \
+    --start-time "2021-01-01T00:00:00" \
+    --end-time "2021-12-01T00:00:00" \
+    --nusers 100 \
+    --kafkaBrokerList 34.38.9.109:9094
+
+docker run -d \
+  --network host \
+  event-sim-container:1 \
+    -c "examples/example-config.json" \
+    --start-time "2021-01-01T00:00:00" \
+    --end-time "2021-12-01T00:00:00" \
+    --nusers 100 \
+    --kafkaBrokerList 35.189.249.169:9094
