@@ -120,3 +120,9 @@ resource "google_cloud_run_v2_job" "default" {
     }
   }
 }
+
+
+resource "google_bigquery_dataset" "music_analytics" {
+  dataset_id = "music_analytics"
+  project     = var.project_id
+}
