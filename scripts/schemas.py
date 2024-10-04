@@ -8,6 +8,8 @@ from pyspark.sql.types import (
     TimestampType,
 )
 
+# RAW TABLES SCHEMAS
+
 auth_events_schema = StructType(
     [
         StructField("ts", LongType(), True),
@@ -101,10 +103,11 @@ status_change_events_schema = StructType(
     ]
 )
 
+# DWH MODEL SCHEMAS
 
 date_dim_schema = StructType(
     [
-        StructField("DateSK", StringType(), False),
+        StructField("DateSK", LongType(), False),
         StructField("timestamp", TimestampType(), True),
         StructField("timestamp_unix", LongType(), True),
         StructField("year", IntegerType(), True),
@@ -115,7 +118,7 @@ date_dim_schema = StructType(
 
 date_time_dim_schema = StructType(
     [
-        StructField("DateTimeSK", StringType(), False),
+        StructField("DateTimeSK", LongType(), False),
         StructField("timestamp", TimestampType(), True),
         StructField("timestamp_unix", LongType(), True),
         StructField("year", IntegerType(), True),
@@ -129,7 +132,7 @@ date_time_dim_schema = StructType(
 
 location_dim_schema = StructType(
     [
-        StructField("LocationSK", StringType(), True),
+        StructField("LocationSK", LongType(), False),
         StructField("city", StringType(), True),
         StructField("zip", StringType(), True),
         StructField("state", StringType(), True),
@@ -153,15 +156,14 @@ user_dim_schema = StructType(
     ]
 )
 
-# TO DO
 event_fact_schema = StructType(
     [
         StructField("userId", LongType(), False),
-        StructField("EventSK", StringType(), False),
-        StructField("DateTimeSK", StringType(), False),
-        StructField("DateSK", StringType(), False),
-        StructField("LocationSK", StringType(), False),
-        StructField("SongSK", StringType(), True),
+        StructField("EventSK", LongType(), False),
+        StructField("DateTimeSK", LongType(), False),
+        StructField("DateSK", LongType(), False),
+        StructField("LocationSK", LongType(), False),
+        StructField("SongSK", LongType(), True),
         StructField("timestamp", LongType(), True),
         StructField("level", StringType(), True),
         StructField("duration", DoubleType(), True),
@@ -179,7 +181,7 @@ event_fact_schema = StructType(
 
 event_dim_schema = StructType(
     [
-        StructField("EventSK", StringType(), False),
+        StructField("EventSK", LongType(), False),
         StructField("userId", LongType(), False),
         StructField("itemInSession", LongType(), False),
         StructField("sessionId", StringType(), False),
@@ -195,7 +197,7 @@ event_dim_schema = StructType(
 
 session_dim_schema = StructType(
     [
-        StructField("SessionSK", StringType(), False),
+        StructField("SessionSK", LongType(), False),
         StructField("sessionId", LongType(), False),
         StructField("userId", LongType(), False),
     ]
@@ -203,24 +205,32 @@ session_dim_schema = StructType(
 
 event_session_bridge_schema = StructType(
     [
-        StructField("SessionSK", StringType(), False),
-        StructField("EventSK", StringType(), False),
+        StructField("SessionSK", LongType(), False),
+        StructField("EventSK", LongType(), False),
     ]
 )
 
 session_fact_schema = StructType(
     [
         StructField("userId", LongType(), False),
-        StructField("DateSK", StringType(), False),
-        StructField("DateTimeSK", StringType(), False),
+        StructField("DateSK", LongType(), False),
+        StructField("DateTimeSK", LongType(), False),
         StructField("session_start_ts", LongType(), False),
         StructField("session_end_ts", LongType(), True),
         StructField("level", StringType(), True),
         StructField("session_duration", DoubleType(), True),
         StructField("primary_s_location", StringType(), True),
-        StructField("SessionSK", StringType(), False),
+        StructField("SessionSK", LongType(), False),
         StructField("record_valid_from", LongType(), True),
         StructField("record_valid_to", LongType(), True),
         StructField("is_record_valid", IntegerType(), True),
+    ]
+)
+
+song_dim_schema = StructType(
+    [
+        StructField("SongSK", LongType(), False),
+        StructField("artist", StringType(), True),
+        StructField("song", StringType(), True),
     ]
 )

@@ -1,5 +1,5 @@
 import os
-
+import schemas
 
 # Spark Jars
 os.environ["PYSPARK_SUBMIT_ARGS"] = (
@@ -60,3 +60,21 @@ DB_TABLE_EVENT_FACT = "EventFact"
 DB_TABLE_SESSION_FACT = "SessionFact"
 
 DB_TABLE_EVENT_SESSION_BRIDGE = "EventSessionBridge"
+
+
+table_name_with_schema_dict = {
+    DB_TABLE_SONG_DIM: schemas.song_dim_schema,
+    DB_TABLE_USER_DIM: schemas.user_dim_schema,
+    DB_TABLE_DATE_DIM: schemas.date_dim_schema,
+    DB_TABLE_EVENT_DIM: schemas.event_dim_schema,
+    DB_TABLE_SESSION_DIM: schemas.session_dim_schema,
+    DB_TABLE_LOCATION_DIM: schemas.location_dim_schema,
+    DB_TABLE_DATE_TIME_DIM: schemas.date_time_dim_schema,
+    DB_TABLE_EVENT_FACT: schemas.event_fact_schema,
+    DB_TABLE_SESSION_FACT: schemas.session_fact_schema,
+    DB_TABLE_EVENT_SESSION_BRIDGE: schemas.event_session_bridge_schema,
+}
+
+PATH_TO_GOOGLE_APPLICATION_CREDENTIALS = (
+    "/home/lupusruber/music_analytics/keys/music-analytics-project-87df530f458e.json"
+)

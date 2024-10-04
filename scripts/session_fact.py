@@ -20,8 +20,8 @@ from pyspark.sql.functions import (
 def session_fact_stream(spark, listen_events_stream):
 
     def process_batch_for_session_fact(batch_df: DataFrame, batch_id: int) -> None:
-        
-        unique = batch_df.dropDuplicates(['SessionSK'])
+
+        unique = batch_df.dropDuplicates(["SessionSK"])
 
         session_fact_with_tss = (
             unique.withColumn("record_valid_from", col("ts"))
@@ -29,8 +29,8 @@ def session_fact_stream(spark, listen_events_stream):
             .withColumn("is_record_valid", lit(1))
             .withColumn("session_duration", lit(0).cast("double"))
             .withColumn("primary_s_location", lit(None).cast("string"))
-            .withColumn("session_start_ts", lit(None).cast('long'))
-            .withColumn("session_end_ts", lit(None).cast('long'))
+            .withColumn("session_start_ts", lit(None).cast("long"))
+            .withColumn("session_end_ts", lit(None).cast("long"))
         )
 
         session_fact_with_cols = session_fact_with_tss.select(
@@ -47,13 +47,12 @@ def session_fact_stream(spark, listen_events_stream):
             col("record_valid_to"),
             col("is_record_valid"),
         )
-        
+
         main_dwh_df = read_from_postgres(spark, DB_TABLE_SESSION_FACT)
         new_unique_records = session_fact_with_cols.join(
             main_dwh_df, on=["SessionSK"], how="left_anti"
         )
         write_to_postgres(new_unique_records, DB_TABLE_SESSION_FACT)
-        
 
     session_fact_with_sks = (
         listen_events_stream.filter(col("duration").isNotNull())

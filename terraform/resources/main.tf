@@ -6,7 +6,6 @@ provider "google" {
 
 }
 
-# Airflow VM Instance
 resource "google_compute_instance" "airflow_vm" {
   name         = "airflow-vm-instance"
   machine_type = "e2-standard-4" # Upgraded machine type
@@ -48,12 +47,10 @@ resource "google_compute_instance" "airflow_vm" {
   }
 }
 
-# Output the external IP of the Airflow VM
 output "airflow_vm_external_ip" {
   value = google_compute_instance.airflow_vm.network_interface[0].access_config[0].nat_ip
 }
 
-# Dataproc Cluster for Spark
 resource "google_dataproc_cluster" "dataproc_cluster" {
   name   = "dataproc-cluster"
   region = var.region
@@ -79,7 +76,6 @@ resource "google_dataproc_cluster" "dataproc_cluster" {
   }
 }
 
-# Output the Dataproc cluster details (Cluster name and master node)
 output "dataproc_cluster_name" {
   value = google_dataproc_cluster.dataproc_cluster.name
 }
@@ -125,4 +121,31 @@ resource "google_cloud_run_v2_job" "default" {
 resource "google_bigquery_dataset" "music_analytics" {
   dataset_id = "music_analytics"
   project     = var.project_id
+}
+
+
+resource "google_storage_bucket" "music_analytics_bucket" {
+  name                        = "music_analytics_bucket"
+  location                    = var.region
+  force_destroy               = true
+  storage_class               = "STANDARD"
+  uniform_bucket_level_access = true
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age = 21
+    }
+  }
+}
+
+
+output "bucket_name" {
+  value = google_storage_bucket.music_analytics_bucket.name
 }
