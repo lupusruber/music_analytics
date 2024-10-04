@@ -78,3 +78,11 @@ table_name_with_schema_dict = {
 PATH_TO_GOOGLE_APPLICATION_CREDENTIALS = (
     "/home/lupusruber/music_analytics/keys/music-analytics-project-87df530f458e.json"
 )
+
+PROJECT_ID = "music-analytics-project"
+DATASET_ID = "music_analytics"
+REGION = "us-central1"
+CLUSTER_NAME = "dataproc-cluster"
+TEMP_GCS_BUCKET = "music_analytics_bucket"
+
+CHECKPOINT_DIR_ROOT = "./checkpoints"

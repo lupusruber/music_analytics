@@ -1,22 +1,22 @@
-from configs import DB_TABLE_LOCATION_DIM
-from util_functions import read_from_postgres, write_to_postgres
+from configs import DB_TABLE_LOCATION_DIM, CHECKPOINT_DIR_ROOT
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, concat_ws, md5
+from pyspark.sql.functions import col, concat_ws, hash
+from util_functions import write_to_bigquery, read_from_bigquery_dwh
 
 
 def location_dim_stream(spark, page_view_events):
 
     def process_batch_for_location_dim(batch_df: DataFrame, batch_id: int) -> None:
 
-        main_dwh_df = read_from_postgres(spark, DB_TABLE_LOCATION_DIM)
+        main_dwh_df = read_from_bigquery_dwh(spark, DB_TABLE_LOCATION_DIM)
         new_unique_records = batch_df.join(
             main_dwh_df, on=["LocationSK"], how="left_anti"
         )
-        write_to_postgres(new_unique_records, DB_TABLE_LOCATION_DIM)
+        write_to_bigquery(new_unique_records, DB_TABLE_LOCATION_DIM)
 
     locatiom_with_sk = page_view_events.withColumn(
         "LocationSK",
-        md5(
+        hash(
             concat_ws(
                 "_",
                 col("city").cast("string"),
@@ -25,7 +25,7 @@ def location_dim_stream(spark, page_view_events):
                 col("lon").cast("string"),
                 col("lat").cast("string"),
             )
-        ),
+        ).cast('long'),
     )
 
     location_dim = locatiom_with_sk.select(
@@ -36,7 +36,7 @@ def location_dim_stream(spark, page_view_events):
         location_dim.writeStream.foreachBatch(process_batch_for_location_dim)
         .option(
             "checkpointLocation",
-            "/home/lupusruber/music_analytics/checkpoints/location_dim_checkpoint",
+            f"{CHECKPOINT_DIR_ROOT}/location_dim_checkpoint",
         )
         .start()
     )

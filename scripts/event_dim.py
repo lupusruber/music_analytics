@@ -1,8 +1,7 @@
-from configs import DB_TABLE_EVENT_DIM
-from util_functions import read_from_postgres, write_to_postgres
+from configs import DB_TABLE_EVENT_DIM, CHECKPOINT_DIR_ROOT
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, md5, concat_ws, when
-import pyspark.sql.functions as F
+from pyspark.sql.functions import col, hash, concat_ws, when
+from util_functions import read_from_bigquery_dwh, write_to_bigquery
 
 
 def event_dim_stream(spark, page_view_stream):
@@ -28,21 +27,21 @@ def event_dim_stream(spark, page_view_stream):
             col("is_listen_event"),
         )
 
-        main_dwh_df = read_from_postgres(spark, DB_TABLE_EVENT_DIM)
+        main_dwh_df = read_from_bigquery_dwh(spark, DB_TABLE_EVENT_DIM)
         new_unique_records = event_dim_with_dwh_columns.join(
             main_dwh_df, on=["EventSK"], how="left_anti"
         )
-        write_to_postgres(new_unique_records, DB_TABLE_EVENT_DIM)
+        write_to_bigquery(new_unique_records, DB_TABLE_EVENT_DIM)
 
     event_dim_with_sk = page_view_stream.withColumn(
-        "EventSK", md5(concat_ws("_", col("sessionId"), col("itemInSession")))
+        "EventSK", hash(concat_ws("_", col("sessionId"), col("itemInSession"))).cast('long')
     ).withColumn("is_listen_event", when(col("song").isNotNull(), 1).otherwise(0))
 
     event_dim_writer = (
         event_dim_with_sk.writeStream.foreachBatch(process_batch_for_event_dim)
         .option(
             "checkpointLocation",
-            "/home/lupusruber/music_analytics/checkpoints/event_dim_checkpoint",
+            f"{CHECKPOINT_DIR_ROOT}/event_dim_checkpoint",
         )
         .start()
     )

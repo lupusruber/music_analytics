@@ -1,7 +1,7 @@
-from configs import DB_TABLE_DATE_DIM, DB_TABLE_DATE_TIME_DIM
-from util_functions import read_from_postgres, write_to_postgres
+from configs import DB_TABLE_DATE_DIM, DB_TABLE_DATE_TIME_DIM, CHECKPOINT_DIR_ROOT
+from util_functions import read_from_bigquery_dwh, write_to_bigquery
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, concat_ws, md5
+from pyspark.sql.functions import col, concat_ws, hash
 from pyspark.sql.functions import (
     col,
     year,
@@ -20,16 +20,16 @@ def date_and_date_time_stream(spark, page_view_events):
         batch_df: DataFrame, batch_id: int
     ) -> None:
 
-        date_dim_from_dwh = read_from_postgres(spark, DB_TABLE_DATE_DIM)
+        date_dim_from_dwh = read_from_bigquery_dwh(spark, DB_TABLE_DATE_DIM)
         new_date_data = batch_df.dropDuplicates(["DateSK"]).select(
             "DateSK", "year", "month", "day"
         )
         new_date_data_unique = new_date_data.join(
             date_dim_from_dwh, on=["DateSK"], how="left_anti"
         )
-        write_to_postgres(new_date_data_unique, DB_TABLE_DATE_DIM)
+        write_to_bigquery(new_date_data_unique, DB_TABLE_DATE_DIM)
 
-        date_time_dim_from_dwh = read_from_postgres(spark, DB_TABLE_DATE_TIME_DIM)
+        date_time_dim_from_dwh = read_from_bigquery_dwh(spark, DB_TABLE_DATE_TIME_DIM)
         new_date_time_data = batch_df.select(
             "DateTimeSK",
             "year",
@@ -42,7 +42,7 @@ def date_and_date_time_stream(spark, page_view_events):
         new_date_time_data_unique = new_date_time_data.join(
             date_time_dim_from_dwh, on=["DateTimeSK"], how="left_anti"
         )
-        write_to_postgres(new_date_time_data_unique, DB_TABLE_DATE_TIME_DIM)
+        write_to_bigquery(new_date_time_data_unique, DB_TABLE_DATE_TIME_DIM)
 
     only_ts = (
         page_view_events.select("ts")
@@ -58,7 +58,7 @@ def date_and_date_time_stream(spark, page_view_events):
         )
         .withColumn(
             "DateTimeSK",
-            md5(
+            hash(
                 concat_ws(
                     "_",
                     col("year").cast("string"),
@@ -68,18 +68,18 @@ def date_and_date_time_stream(spark, page_view_events):
                     col("minute").cast("string"),
                     col("second").cast("string"),
                 )
-            ),
+            ).cast('long'),
         )
         .withColumn(
             "DateSK",
-            md5(
+            hash(
                 concat_ws(
                     "_",
                     col("year").cast("string"),
                     col("month").cast("string"),
                     col("day").cast("string"),
                 )
-            ),
+            ).cast('long'),
         )
     )
 
@@ -87,7 +87,7 @@ def date_and_date_time_stream(spark, page_view_events):
         only_ts.writeStream.foreachBatch(process_batch_for_date_date_time_dim)
         .option(
             "checkpointLocation",
-            "/home/lupusruber/music_analytics/checkpoints/date_and_date_time_dims_checkpoint",
+            f"{CHECKPOINT_DIR_ROOT}/date_and_date_time_dims_checkpoint",
         )
         .start()
     )

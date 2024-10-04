@@ -1,6 +1,6 @@
-from configs import DB_TABLE_SESSION_FACT
-from util_functions import write_to_postgres, read_from_postgres
+from configs import DB_TABLE_SESSION_FACT, CHECKPOINT_DIR_ROOT
 from pyspark.sql import DataFrame
+from util_functions import write_to_bigquery, read_from_bigquery_dwh
 
 from pyspark.sql.functions import (
     col,
@@ -12,7 +12,7 @@ from pyspark.sql.functions import (
     second,
     from_unixtime,
     concat_ws,
-    md5,
+    hash,
     lit,
 )
 
@@ -48,11 +48,11 @@ def session_fact_stream(spark, listen_events_stream):
             col("is_record_valid"),
         )
 
-        main_dwh_df = read_from_postgres(spark, DB_TABLE_SESSION_FACT)
+        main_dwh_df = read_from_bigquery_dwh(spark, DB_TABLE_SESSION_FACT)
         new_unique_records = session_fact_with_cols.join(
             main_dwh_df, on=["SessionSK"], how="left_anti"
         )
-        write_to_postgres(new_unique_records, DB_TABLE_SESSION_FACT)
+        write_to_bigquery(new_unique_records, DB_TABLE_SESSION_FACT)
 
     session_fact_with_sks = (
         listen_events_stream.filter(col("duration").isNotNull())
@@ -65,7 +65,7 @@ def session_fact_stream(spark, listen_events_stream):
         .withColumn("second", second(col("timestamp")))
         .withColumn(
             "DateTimeSK",
-            md5(
+            hash(
                 concat_ws(
                     "_",
                     col("year").cast("string"),
@@ -75,26 +75,26 @@ def session_fact_stream(spark, listen_events_stream):
                     col("minute").cast("string"),
                     col("second").cast("string"),
                 )
-            ),
+            ).cast('long'),
         )
         .withColumn(
             "DateSK",
-            md5(
+            hash(
                 concat_ws(
                     "_",
                     col("year").cast("string"),
                     col("month").cast("string"),
                     col("day").cast("string"),
                 )
-            ),
+            ).cast('long'),
         )
         .withColumn(
             "SessionSK",
-            md5(
+            hash(
                 concat_ws(
                     "_", col("userId").cast("string"), col("sessionId").cast("string")
                 )
-            ),
+            ).cast('long'),
         )
     )
 
@@ -102,7 +102,7 @@ def session_fact_stream(spark, listen_events_stream):
         session_fact_with_sks.writeStream.foreachBatch(process_batch_for_session_fact)
         .option(
             "checkpointLocation",
-            "/home/lupusruber/music_analytics/checkpoints/session_fact_checkpoint",
+            f"{CHECKPOINT_DIR_ROOT}/session_fact_checkpoint",
         )
         .start()
     )

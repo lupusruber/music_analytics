@@ -1,14 +1,12 @@
 from pyspark.sql import SparkSession
 import os
-from configs import table_name_with_schema_dict, PATH_TO_GOOGLE_APPLICATION_CREDENTIALS
-
-project_id = "music-analytics-project"
-region = "us-central1"
-cluster_name = "dataproc-cluster"
-
-dataset_id = "music_analytics"
-
-temp_gcs_bucket = "music_analytics_bucket"
+from configs import (
+    table_name_with_schema_dict,
+    PATH_TO_GOOGLE_APPLICATION_CREDENTIALS,
+    TEMP_GCS_BUCKET,
+    PROJECT_ID,
+    DATASET_ID,
+)
 
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = PATH_TO_GOOGLE_APPLICATION_CREDENTIALS
@@ -36,10 +34,10 @@ spark = (
         "fs.gs.auth.service.account.json.keyfile",
         PATH_TO_GOOGLE_APPLICATION_CREDENTIALS,
     )
+    .config("temporaryGcsBucket", TEMP_GCS_BUCKET)
     .getOrCreate()
 )
 
-spark.conf.set("temporaryGcsBucket", temp_gcs_bucket)
 
 for table_id, schema in table_name_with_schema_dict.items():
 
@@ -49,5 +47,5 @@ for table_id, schema in table_name_with_schema_dict.items():
     )
 
     df.write.format("bigquery").option("writeMethod", "direct").option(
-        "table", f"{project_id}:{dataset_id}.{table_id}"
+        "table", f"{PROJECT_ID}:{DATASET_ID}.{table_id}"
     ).save()

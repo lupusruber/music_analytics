@@ -1,5 +1,5 @@
-from configs import DB_TABLE_EVENT_FACT
-from util_functions import write_to_postgres, read_from_postgres
+from configs import DB_TABLE_EVENT_FACT, CHECKPOINT_DIR_ROOT
+from util_functions import write_to_bigquery
 from pyspark.sql import DataFrame
 from pyspark.sql.window import Window
 
@@ -13,15 +13,13 @@ from pyspark.sql.functions import (
     second,
     from_unixtime,
     concat_ws,
-    md5,
+    hash,
     lag,
     lead,
     when,
     unix_timestamp,
     lit,
 )
-from pyspark.sql.functions import hash as py_hash
-
 
 def event_fact_stream(spark, listen_events_stream):
 
@@ -88,7 +86,7 @@ def event_fact_stream(spark, listen_events_stream):
             col("is_record_valid"),
         )
 
-        write_to_postgres(event_fact_with_added_cols, DB_TABLE_EVENT_FACT)
+        write_to_bigquery(event_fact_with_added_cols, DB_TABLE_EVENT_FACT)
 
     event_fact_with_sks = (
         listen_events_stream.filter(col("duration").isNotNull())
@@ -101,7 +99,7 @@ def event_fact_stream(spark, listen_events_stream):
         .withColumn("second", second(col("timestamp")))
         .withColumn(
             "DateTimeSK",
-            md5(
+            hash(
                 concat_ws(
                     "_",
                     col("year").cast("string"),
@@ -111,22 +109,22 @@ def event_fact_stream(spark, listen_events_stream):
                     col("minute").cast("string"),
                     col("second").cast("string"),
                 )
-            ),
+            ).cast('long'),
         )
         .withColumn(
             "DateSK",
-            md5(
+            hash(
                 concat_ws(
                     "_",
                     col("year").cast("string"),
                     col("month").cast("string"),
                     col("day").cast("string"),
                 )
-            ),
+            ).cast('long'),
         )
         .withColumn(
             "LocationSK",
-            md5(
+            hash(
                 concat_ws(
                     "_",
                     col("city").cast("string"),
@@ -135,11 +133,11 @@ def event_fact_stream(spark, listen_events_stream):
                     col("lon").cast("string"),
                     col("lat").cast("string"),
                 )
-            ),
+            ).cast('long'),
         )
-        .withColumn("SongSK", md5(concat_ws("_", col("song"), col("artist"))))
+        .withColumn("SongSK", hash(concat_ws("_", col("song"), col("artist"))).cast('long'))
         .withColumn(
-            "EventSK", md5(concat_ws("_", col("sessionId"), col("itemInSession")))
+            "EventSK", hash(concat_ws("_", col("sessionId"), col("itemInSession"))).cast('long')
         )
     )
 
@@ -147,7 +145,7 @@ def event_fact_stream(spark, listen_events_stream):
         event_fact_with_sks.writeStream.foreachBatch(process_batch_for_event_fact)
         .option(
             "checkpointLocation",
-            "/home/lupusruber/music_analytics/checkpoints/event_fact_checkpoint",
+            f"{CHECKPOINT_DIR_ROOT}/event_fact_checkpoint",
         )
         .start()
     )

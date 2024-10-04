@@ -1,8 +1,8 @@
-from configs import DB_TABLE_USER_DIM
-from util_functions import read_from_postgres, write_to_postgres
+from configs import DB_TABLE_USER_DIM, CHECKPOINT_DIR_ROOT
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
 import pyspark.sql.functions as F
+from util_functions import read_from_bigquery_dwh, write_to_bigquery
 
 
 def user_dim_stream(spark, listen_events_stream):
@@ -27,11 +27,11 @@ def user_dim_stream(spark, listen_events_stream):
             col("lat").alias("registration_lat"),
         )
 
-        main_dwh_df = read_from_postgres(spark, DB_TABLE_USER_DIM)
+        main_dwh_df = read_from_bigquery_dwh(spark, DB_TABLE_USER_DIM)
         new_unique_records = user_dim_with_dwh_columns.join(
             main_dwh_df, on=["userId"], how="left_anti"
         )
-        write_to_postgres(new_unique_records, DB_TABLE_USER_DIM)
+        write_to_bigquery(new_unique_records, DB_TABLE_USER_DIM)
 
     listen_events_stream_with_watermark = listen_events_stream.withColumn(
         "event_time", F.from_unixtime(F.col("ts") / 1000).cast("timestamp")
@@ -56,7 +56,7 @@ def user_dim_stream(spark, listen_events_stream):
         .outputMode("update")
         .option(
             "checkpointLocation",
-            "/home/lupusruber/music_analytics/checkpoints/user_dim_checkpoint",
+            f"{CHECKPOINT_DIR_ROOT}/checkpoints/user_dim_checkpoint",
         )
         .start()
     )
