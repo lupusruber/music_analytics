@@ -47,7 +47,7 @@ DB_PROPERTIES = {
     "driver": "org.postgresql.Driver",
 }
 
-# DWH Tables
+# DWH Tables & Schemas
 DB_TABLE_SONG_DIM = "SongDim"
 DB_TABLE_USER_DIM = "UserDim"
 DB_TABLE_DATE_DIM = "DateDim"
@@ -60,7 +60,6 @@ DB_TABLE_EVENT_FACT = "EventFact"
 DB_TABLE_SESSION_FACT = "SessionFact"
 
 DB_TABLE_EVENT_SESSION_BRIDGE = "EventSessionBridge"
-
 
 table_name_with_schema_dict = {
     DB_TABLE_SONG_DIM: schemas.song_dim_schema,
@@ -75,6 +74,7 @@ table_name_with_schema_dict = {
     DB_TABLE_EVENT_SESSION_BRIDGE: schemas.event_session_bridge_schema,
 }
 
+# GCP
 PATH_TO_GOOGLE_APPLICATION_CREDENTIALS = (
     "/home/lupusruber/music_analytics/keys/music-analytics-project-87df530f458e.json"
 )
@@ -85,4 +85,5 @@ REGION = "us-central1"
 CLUSTER_NAME = "dataproc-cluster"
 TEMP_GCS_BUCKET = "music_analytics_bucket"
 
+# Checkpoints
 CHECKPOINT_DIR_ROOT = "./checkpoints"
