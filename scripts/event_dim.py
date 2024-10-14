@@ -34,7 +34,8 @@ def event_dim_stream(spark, page_view_stream):
         write_to_bigquery(new_unique_records, DB_TABLE_EVENT_DIM)
 
     event_dim_with_sk = page_view_stream.withColumn(
-        "EventSK", hash(concat_ws("_", col("sessionId"), col("itemInSession"))).cast('long')
+        "EventSK",
+        hash(concat_ws("_", col("sessionId"), col("itemInSession"))).cast("long"),
     ).withColumn("is_listen_event", when(col("song").isNotNull(), 1).otherwise(0))
 
     event_dim_writer = (

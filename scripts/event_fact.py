@@ -21,6 +21,7 @@ from pyspark.sql.functions import (
     lit,
 )
 
+
 def event_fact_stream(spark, listen_events_stream):
 
     def process_batch_for_event_fact(batch_df: DataFrame, batch_id: int) -> None:
@@ -109,7 +110,7 @@ def event_fact_stream(spark, listen_events_stream):
                     col("minute").cast("string"),
                     col("second").cast("string"),
                 )
-            ).cast('long'),
+            ).cast("long"),
         )
         .withColumn(
             "DateSK",
@@ -120,7 +121,7 @@ def event_fact_stream(spark, listen_events_stream):
                     col("month").cast("string"),
                     col("day").cast("string"),
                 )
-            ).cast('long'),
+            ).cast("long"),
         )
         .withColumn(
             "LocationSK",
@@ -133,11 +134,14 @@ def event_fact_stream(spark, listen_events_stream):
                     col("lon").cast("string"),
                     col("lat").cast("string"),
                 )
-            ).cast('long'),
+            ).cast("long"),
         )
-        .withColumn("SongSK", hash(concat_ws("_", col("song"), col("artist"))).cast('long'))
         .withColumn(
-            "EventSK", hash(concat_ws("_", col("sessionId"), col("itemInSession"))).cast('long')
+            "SongSK", hash(concat_ws("_", col("song"), col("artist"))).cast("long")
+        )
+        .withColumn(
+            "EventSK",
+            hash(concat_ws("_", col("sessionId"), col("itemInSession"))).cast("long"),
         )
     )
 

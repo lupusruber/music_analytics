@@ -2,11 +2,15 @@ import os
 import schemas
 
 # Spark Jars
-os.environ["PYSPARK_SUBMIT_ARGS"] = (
-    "--packages org.apache.spark:spark-streaming-kafka-0-10_2.12:3.2.0,"
-    "org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.0,"
-    "org.postgresql:postgresql:42.5.0 pyspark-shell"
-)
+# os.environ["PYSPARK_SUBMIT_ARGS"] = (
+#     "--packages "
+#     "org.apache.spark:spark-streaming-kafka-0-10_2.12:3.2.0,"
+#     "org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.0,"
+#     "org.postgresql:postgresql:42.5.0,"
+#     "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.28.0,"
+#     "com.google.cloud.bigdataoss:gcs-connector:hadoop3-2.2.5 "
+#     "pyspark-shell"
+# )
 
 # Spark Settings
 SPARK_MASTER_URL = "local[*]"  # later "spark://localhost:7077"
@@ -26,7 +30,7 @@ STATUS_CHANGE_EVENTS_TOPIC = LIST_OF_TOPICS[3]
 TOPICS_STRING = ",".join(LIST_OF_TOPICS)
 
 # Kafka Connection
-KAFKA_BROKER_URL = "localhost"
+KAFKA_BROKER_URL = "35.189.249.169"
 KAFKA_BROKER_PORT = "9094"
 BOOTSTRAP_SERVERS = f"{KAFKA_BROKER_URL}:{KAFKA_BROKER_PORT}"
 
@@ -78,6 +82,8 @@ table_name_with_schema_dict = {
 PATH_TO_GOOGLE_APPLICATION_CREDENTIALS = (
     "/home/lupusruber/music_analytics/keys/music-analytics-project-87df530f458e.json"
 )
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = PATH_TO_GOOGLE_APPLICATION_CREDENTIALS
+
 
 PROJECT_ID = "music-analytics-project"
 DATASET_ID = "music_analytics"

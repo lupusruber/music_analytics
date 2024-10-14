@@ -25,7 +25,7 @@ def location_dim_stream(spark, page_view_events):
                 col("lon").cast("string"),
                 col("lat").cast("string"),
             )
-        ).cast('long'),
+        ).cast("long"),
     )
 
     location_dim = locatiom_with_sk.select(

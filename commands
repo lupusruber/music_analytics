@@ -37,3 +37,6 @@ docker run -d \
     --end-time "2021-12-01T00:00:00" \
     --nusers 100 \
     --kafkaBrokerList 35.189.249.169:9094
+
+
+gcloud dataproc jobs submit pyspark     --cluster=dataproc-cluster     --region=us-central1     --py-files=scripts.zip     --properties-file=config.yaml     generate_big_query_tables.py

@@ -28,7 +28,7 @@ def session_fact_stream(spark, listen_events_stream):
             .withColumn("record_valid_to", lit(None).cast("long"))
             .withColumn("is_record_valid", lit(1))
             .withColumn("session_duration", lit(0).cast("double"))
-            .withColumn("primary_s_location", lit(None).cast("string"))
+            .withColumn("primary_s_location", lit(None).cast("long"))
             .withColumn("session_start_ts", lit(None).cast("long"))
             .withColumn("session_end_ts", lit(None).cast("long"))
         )
@@ -75,7 +75,7 @@ def session_fact_stream(spark, listen_events_stream):
                     col("minute").cast("string"),
                     col("second").cast("string"),
                 )
-            ).cast('long'),
+            ).cast("long"),
         )
         .withColumn(
             "DateSK",
@@ -86,7 +86,7 @@ def session_fact_stream(spark, listen_events_stream):
                     col("month").cast("string"),
                     col("day").cast("string"),
                 )
-            ).cast('long'),
+            ).cast("long"),
         )
         .withColumn(
             "SessionSK",
@@ -94,7 +94,7 @@ def session_fact_stream(spark, listen_events_stream):
                 concat_ws(
                     "_", col("userId").cast("string"), col("sessionId").cast("string")
                 )
-            ).cast('long'),
+            ).cast("long"),
         )
     )
 

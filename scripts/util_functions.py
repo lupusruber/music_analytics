@@ -33,10 +33,10 @@ def write_new_files_to_dummy_dwh(df: DataFrame, file_path: str):
     return df.write.mode("append").csv(file_path)
 
 
-def write_to_bigquery(spark_data_frame: DataFrame, table_id: str):
+def write_to_bigquery(spark_data_frame: DataFrame, table_id: str, mode: str = "append"):
 
     (
-        spark_data_frame.write.mode("append")
+        spark_data_frame.write.mode(mode)
         .format("bigquery")
         .option("table", f"{PROJECT_ID}:{DATASET_ID}.{table_id}")
         .save()

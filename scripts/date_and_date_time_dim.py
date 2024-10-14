@@ -22,7 +22,12 @@ def date_and_date_time_stream(spark, page_view_events):
 
         date_dim_from_dwh = read_from_bigquery_dwh(spark, DB_TABLE_DATE_DIM)
         new_date_data = batch_df.dropDuplicates(["DateSK"]).select(
-            "DateSK", "year", "month", "day"
+            col("DateSK"),
+            col("timestamp"),
+            col("ts").alias("timestamp_unix"),
+            col("year"),
+            col("month"),
+            col("day"),
         )
         new_date_data_unique = new_date_data.join(
             date_dim_from_dwh, on=["DateSK"], how="left_anti"
@@ -31,13 +36,15 @@ def date_and_date_time_stream(spark, page_view_events):
 
         date_time_dim_from_dwh = read_from_bigquery_dwh(spark, DB_TABLE_DATE_TIME_DIM)
         new_date_time_data = batch_df.select(
-            "DateTimeSK",
-            "year",
-            "month",
-            "day",
-            "hour",
-            "minute",
-            "second",
+            col("DateTimeSK"),
+            col("timestamp"),
+            col("ts").alias("timestamp_unix"),
+            col("year"),
+            col("month"),
+            col("day"),
+            col("hour"),
+            col("minute"),
+            col("second"),
         ).dropDuplicates(["DateTimeSK"])
         new_date_time_data_unique = new_date_time_data.join(
             date_time_dim_from_dwh, on=["DateTimeSK"], how="left_anti"
@@ -48,14 +55,12 @@ def date_and_date_time_stream(spark, page_view_events):
         page_view_events.select("ts")
         .dropDuplicates(["ts"])
         .withColumn("timestamp", from_unixtime(col("ts") / 1000).cast("timestamp"))
-        .select(
-            year("timestamp").alias("year"),
-            month("timestamp").alias("month"),
-            dayofmonth("timestamp").alias("day"),
-            hour("timestamp").alias("hour"),
-            minute("timestamp").alias("minute"),
-            second("timestamp").alias("second"),
-        )
+        .withColumn("year", year("timestamp"))
+        .withColumn("month", month("timestamp"))
+        .withColumn("day", dayofmonth("timestamp"))
+        .withColumn("hour", hour("timestamp"))
+        .withColumn("minute", minute("timestamp"))
+        .withColumn("second", second("timestamp"))
         .withColumn(
             "DateTimeSK",
             hash(
@@ -68,7 +73,7 @@ def date_and_date_time_stream(spark, page_view_events):
                     col("minute").cast("string"),
                     col("second").cast("string"),
                 )
-            ).cast('long'),
+            ).cast("long"),
         )
         .withColumn(
             "DateSK",
@@ -79,7 +84,7 @@ def date_and_date_time_stream(spark, page_view_events):
                     col("month").cast("string"),
                     col("day").cast("string"),
                 )
-            ).cast('long'),
+            ).cast("long"),
         )
     )
 

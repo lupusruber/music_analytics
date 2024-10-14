@@ -1,10 +1,10 @@
 from pyspark.sql.session import SparkSession
 
 from configs import (
-    SPARK_MASTER_URL,
     APP_NAME,
     PAGE_VIEW_EVENTS_TOPIC,
     LISTEN_EVENTS_TOPIC,
+    TEMP_GCS_BUCKET,
 )
 
 from song_dim import song_dim_stream
@@ -22,7 +22,15 @@ from util_functions import create_stream
 def main() -> None:
 
     spark = (
-        SparkSession.builder.appName(APP_NAME).master(SPARK_MASTER_URL).getOrCreate()
+        SparkSession.builder.appName(APP_NAME)
+        .config("spark.hadoop.google.cloud.auth.service.account.enable", "true")
+        .config("fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem")
+        .config("fs.gs.auth.service.account.enable", "true")
+        .config(
+            "spark.history.fs.update.interval", "10s"
+        )  # Set the update interval to 10 seconds
+        .config("temporaryGcsBucket", TEMP_GCS_BUCKET)
+        .getOrCreate()
     )
 
     page_view_events = create_stream(

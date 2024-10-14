@@ -1,4 +1,8 @@
-from configs import DB_TABLE_SESSION_DIM, DB_TABLE_EVENT_SESSION_BRIDGE, CHECKPOINT_DIR_ROOT
+from configs import (
+    DB_TABLE_SESSION_DIM,
+    DB_TABLE_EVENT_SESSION_BRIDGE,
+    CHECKPOINT_DIR_ROOT,
+)
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, hash, concat_ws
 from util_functions import read_from_bigquery_dwh, write_to_bigquery
@@ -45,9 +49,13 @@ def session_dim_bridge_stream(spark, page_view_stream):
     session_dim_bridge_with_sk = (
         page_view_stream.filter(col("userId").isNotNull())
         .withColumn(
-            "EventSK", hash(concat_ws("_", col("sessionId"), col("itemInSession"))).cast('long')
+            "EventSK",
+            hash(concat_ws("_", col("sessionId"), col("itemInSession"))).cast("long"),
         )
-        .withColumn("SessionSK", hash(concat_ws("_", col("userId"), col("sessionId"))).cast('long'))
+        .withColumn(
+            "SessionSK",
+            hash(concat_ws("_", col("userId"), col("sessionId"))).cast("long"),
+        )
     )
 
     session_dim_bridge_writer = (

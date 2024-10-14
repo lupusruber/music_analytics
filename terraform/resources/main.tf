@@ -8,7 +8,7 @@ provider "google" {
 
 resource "google_compute_instance" "airflow_vm" {
   name         = "airflow-vm-instance"
-  machine_type = "e2-standard-4" # Upgraded machine type
+  machine_type = "e2-standard-2"
   zone         = var.zone
   boot_disk {
     initialize_params {
@@ -22,7 +22,7 @@ resource "google_compute_instance" "airflow_vm" {
 
   network_interface {
     network = "default"
-    access_config {} # Required to assign an external IP
+    access_config {}
   }
 
   metadata_startup_script = <<-EOT
@@ -58,19 +58,30 @@ resource "google_dataproc_cluster" "dataproc_cluster" {
 
   cluster_config {
 
-    # gce_cluster_config {
-    #   internal_ip_only = false
+    endpoint_config {
+    enable_http_port_access = true
+  }
 
-    # }
+    gce_cluster_config {
+      internal_ip_only = false
+      service_account = var.service_account_email
+      service_account_scopes = [
+        "cloud-platform"
+      ]
+    }
+
+    lifecycle_config {
+      idle_delete_ttl = "7200s" # 8 hours in seconds
+    }
 
     master_config {
       num_instances = 1
-      machine_type  = "n1-standard-4" # Master node machine type
+      machine_type  = "n1-standard-2"
     }
 
     worker_config {
       num_instances = 2
-      machine_type  = "n1-standard-2" # Worker node machine type
+      machine_type  = "n1-standard-2"
     }
 
   }
@@ -86,8 +97,9 @@ output "dataproc_cluster_master_type" {
 
 
 resource "google_cloud_run_v2_job" "default" {
-  name     = "data-generate-job"
-  location = var.region
+  name                = "data-generate-job"
+  location            = var.region
+  deletion_protection = false
 
   template {
     template {
@@ -100,7 +112,7 @@ resource "google_cloud_run_v2_job" "default" {
           }
         }
 
-        command = []  # This can be left empty or omitted if you're using the default command in the container
+        command = []
 
         args = [
           "-c", "examples/example-config.json",
@@ -111,16 +123,21 @@ resource "google_cloud_run_v2_job" "default" {
         ]
       }
 
-      # Set the maximum duration for the job execution
-      timeout = "600s"  # Adjust the timeout as needed
+      timeout = "600s" # Adjust the timeout as needed
     }
+  }
+
+   lifecycle {
+    ignore_changes = [
+      template[0].template[0].containers[0].resources[0].limits
+    ]
   }
 }
 
 
 resource "google_bigquery_dataset" "music_analytics" {
   dataset_id = "music_analytics"
-  project     = var.project_id
+  project    = var.project_id
 }
 
 
