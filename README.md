@@ -1,7 +1,7 @@
 # Music Analytics Data Engineering Project
 
 ## 1. Solution Architecture
-![Solution Architecture](https://github.com/lupusruber/crypto_stats/blob/master/Images/ETL%20Pipeline.png)
+![Solution Architecture](https://github.com/lupusruber/music_analytics/blob/master/images/Solution%20Architecture-Page-1.jpg)
 
 ## 2. Scripts
 
