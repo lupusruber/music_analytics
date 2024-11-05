@@ -28,7 +28,7 @@ def main() -> None:
         .config("fs.gs.auth.service.account.enable", "true")
         .config(
             "spark.history.fs.update.interval", "10s"
-        )  # Set the update interval to 10 seconds
+        )
         .config("temporaryGcsBucket", TEMP_GCS_BUCKET)
         .getOrCreate()
     )

@@ -16,7 +16,7 @@ def session_dim_bridge_stream(spark, page_view_stream):
 
         # check which ones are already in the DWH and then append the new ones to the DWH
         # 1. Read the Song Dim from DWH
-        # 2. Antijoin DWH_userId with batch_userId
+        # 2. Antijoin DWH userId with batch userId
         # 3. Append the new rows to DWH
 
         session_dim = batch_df.select(

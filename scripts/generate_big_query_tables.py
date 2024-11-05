@@ -5,9 +5,7 @@ from configs import (
     TEMP_GCS_BUCKET,
     PROJECT_ID,
     DATASET_ID,
-    DB_TABLE_SESSION_FACT
 )
-import schemas
 
 
 spark = (
@@ -27,10 +25,10 @@ spark = (
     .getOrCreate()
 )
 
-dict_ = {DB_TABLE_SESSION_FACT: schemas.session_fact_schema,}
 
 
-for table_id, schema in dict_.items():
+
+for table_id, schema in table_name_with_schema_dict.items():
 
     df = spark.createDataFrame(
         [],

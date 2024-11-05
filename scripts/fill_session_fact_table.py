@@ -41,8 +41,7 @@ bridge = read_from_bigquery_dwh(spark, DB_TABLE_EVENT_SESSION_BRIDGE)
 event_fact_with_session_sk = event_fact.join(bridge, on="EventSK", how="inner")
 
 
-# Step 1: Perform the group by and aggregate functions
-# Step 2: Create a DataFrame for the new session records with the additional columns
+# Step 1 and 2: Aggregate and add cols
 new_session_records = (
     event_fact_with_session_sk.groupBy("SessionSK")
     .agg(
@@ -73,18 +72,18 @@ records_to_close = (
     existing_session_fact.join(new_session_records, on="SessionSK", how="inner")
     .filter(F.col("existing.record_valid_from") > F.col("new.record_valid_from"))
     .select(
-        "existing.*",  # Select all columns from the existing session
+        "existing.*",
         F.col("new.record_valid_from").alias("new_record_valid_from"),
     )
 )
 
 
-# Step 3: Update the existing records' record_valid_to to match new_record_valid_from and mark them as closed
+# Step 3: Update the existing records' + close
 closed_session_records = (
     records_to_close.withColumn("record_valid_to", F.col("new_record_valid_from"))
     .withColumn("is_record_valid", F.lit(0))
     .drop("new_record_valid_from")
-)  # Drop the temporary column after use
+)
 
 closed_session_records = closed_session_records.select(
         F.col("userId"),
@@ -119,7 +118,7 @@ new_session_records = new_session_records.select(
 new_session_records.show(2)
 
 
-# Step 4: Combine the closed records with the new session records
+# Step 4: Combine the closed records with the new
 final_records = closed_session_records.union(new_session_records)
 
 final_records_selected_cols = final_records.select(
@@ -141,4 +140,4 @@ final_records_selected_cols = final_records.select(
 # Write the final records back to BigQuery
 write_to_bigquery(
     final_records_selected_cols, DB_TABLE_SESSION_FACT, mode="append"
-)  # Use 'append' if needed instead
+)
