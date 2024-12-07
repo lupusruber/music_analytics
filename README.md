@@ -46,6 +46,31 @@ The pipeline operates as follows:
 2. **Stream Processing**: Each event stream is processed and transformed into a corresponding dimension or fact table using PySpark.
 3. **Storage**: The processed data is stored in Google Cloud Storage temporarily and then loaded into BigQuery for analytics.
 
+## Airflow Orchestration
+
+Airflow executes two main scripts for handling the data pipeline:
+
+1. **Generating BigQuery Tables**: To generate scripts for transforming data into BigQuery tables, Airflow triggers the following command:
+
+```bash
+gcloud dataproc jobs submit pyspark \
+  --cluster=dataproc-cluster \
+  --region=us-central1 \
+  --py-files=scripts.zip \
+  --properties-file=config.yaml \
+  generate_big_query_tables.py
+```
+
+2. **Continuous Streaming Job:** For a continuous streaming job, Airflow triggers the following command:
+```bash
+gcloud dataproc jobs submit pyspark \
+  --cluster=dataproc-cluster \
+  --region=us-central1 \
+  --py-files=scripts.zip \
+  --properties-file=config.yaml \
+  dims.py
+```
+
 ## Installation & Setup
 
 ### 1. Clone the Repository
