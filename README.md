@@ -2,17 +2,24 @@
 
 This project focuses on building a data pipeline for processing music event data in real-time using Apache Kafka, Google Cloud Dataproc, and Apache Spark. The pipeline processes events such as page views and listen events, transforms them into different dimensional tables and facts, and stores them for further analytics.
 
+## Dashboard
+![Dashboard](https://github.com/lupusruber/music_analytics/blob/master/images/Dashboard.png)
+
+## Data Modelling with Kimball's Approach
+![Model](https://github.com/lupusruber/music_analytics/blob/master/images/Data%20Model.png)
+
+
+
 ## Technologies Used
 
 - **Apache Kafka**: Event streaming platform for managing real-time data streams.
 - **Kubernetes**: Manages Kafka and other services in a containerized environment.
-- **Apache Spark**: Processes large-scale data in real-time using Dataproc clusters.
+- **Apache Spark (Pyspark)**: Processes large-scale data in real-time using Dataproc clusters.
 - **Google Cloud Dataproc**: Managed Spark and Hadoop service in Google Cloud.
 - **Google Cloud Storage**: Temporary storage for data during processing.
 - **Airflow**: Orchestrates the execution of the pipeline.
 - **Terraform**: Infrastructure as code for provisioning cloud resources.
 - **Python**: The main language used for data transformation scripts.
-- **PySpark**: For distributed data processing.
 
 ## Solution Architecture
 ![Solution Architecture](https://github.com/lupusruber/music_analytics/blob/master/images/Solution%20Architecture-Page-1.jpg)
@@ -44,7 +51,8 @@ The pipeline operates as follows:
 
 1. **Kafka Consumer**: The `dims.py` file reads messages from Kafka topics (`PAGE_VIEW_EVENTS_TOPIC` and `LISTEN_EVENTS_TOPIC`).
 2. **Stream Processing**: Each event stream is processed and transformed into a corresponding dimension or fact table using PySpark.
-3. **Storage**: The processed data is stored in Google Cloud Storage temporarily and then loaded into BigQuery for analytics.
+3. **Storage**: The processed data is directly stored in BigQuery for analytics.
+4. **Visualization**: The data is visualized on a Power Bi dashboard that showcases real-time data from Big Query
 
 ## Airflow Orchestration
 
@@ -125,18 +133,18 @@ python scripts/dims.py
 
 The main transformation logic is contained within the Python scripts located in the `scripts` directory. Each script processes a different dimension or fact, such as:
 
-- `song_dim.py`: Processes song-related data.
-- `location_dim.py`: Processes location-related data.
-- `event_fact.py`: Processes facts related to events.
-- `session_fact.py`: Processes session-based data.
+- `*_dim.py`: Processes data into a dim table.
+- `*_fact.py`: Processes data into a fact table.
 
 The `dims.py` script acts as the orchestrator, creating data streams from the Kafka topics and calling the appropriate transformation function for each stream.
 
 ## Running the Pipeline
 
+- `*configs.py`: Handles the configuration logic to connect to the Kafka clusters, the Dataproc Spark cluster, the BigQuery Warehouse etc.
+
 Once everything is set up, the data processing pipeline will automatically start consuming events from Kafka and applying the necessary transformations to store them in BigQuery. Each transformation is designed to run indefinitely (i.e., `awaitTermination`), processing incoming events in real-time.
 
-You can stop the process by interrupting the script execution with `Ctrl + C`.
+You can stop the process by interrupting the script execution with `Ctrl + C` or terminate the Airflow job.
 
 ## Notes
 
