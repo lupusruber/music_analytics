@@ -16,7 +16,7 @@ This project focuses on building a data pipeline for processing music event data
 - **Kubernetes**: Manages Kafka and other services in a containerized environment.
 - **Apache Spark (Pyspark)**: Processes large-scale data in real-time using Dataproc clusters.
 - **Google Cloud Dataproc**: Managed Spark and Hadoop service in Google Cloud.
-- **Google Cloud Storage**: Temporary storage for data during processing.
+- **Google Big Query**: DWH storage for the processed data.
 - **Airflow**: Orchestrates the execution of the pipeline.
 - **Terraform**: Infrastructure as code for provisioning cloud resources.
 - **Python**: The main language used for data transformation scripts.
