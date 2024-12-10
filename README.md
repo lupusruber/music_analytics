@@ -37,10 +37,12 @@ This project focuses on building a data pipeline for processing music event data
 
 ## Data Pipeline Overview
 
-The project consists of multiple data streams from two main event types:
+The project consists of multiple data streams from two main event types generated from a syntetic data generator called Eventsim:
 
 - **Page View Events**: Represents users viewing pages in the music app.
 - **Listen Events**: Represents users listening to songs.
+
+THhe eventsim docker containers is run while connected to Kafka and directly puts the generated data into Kafka.
 
 These streams are processed through different **dimensional tables** and **fact tables**:
 
